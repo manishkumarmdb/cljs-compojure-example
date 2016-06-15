@@ -10,23 +10,31 @@
                  [org.clojure/clojurescript "1.8.51"]
                  [org.clojure/core.async "0.2.374"
                   :exclusions [org.clojure/tools.reader]]
-                 [reagent "0.5.1"]]
+                 [reagent "0.5.1"]
+                 [compojure "1.5.0"]
+                 [ring/ring-defaults "0.2.1"]
+                 [ring/ring-json "0.4.0"]
+                 [cljs-ajax "0.5.5"]
+                 [prismatic/dommy "1.1.0"]]
   
-  :plugins [[lein-figwheel "0.5.3-2"]
+  :plugins [[lein-ring "0.9.7"]
+            [lein-figwheel "0.5.3-2"]
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
 
-  :source-paths ["src"]
+  :ring {:handler cljs-compojure-example.handler/app}
+
+  :source-paths ["src/clj" "src/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src"]
+                :source-paths ["src/clj" "src/cljs"]
 
                 ;; If no code is to be run, set :figwheel true for continued automagical reloading
                 :figwheel {:on-jsload "cljs-compojure-example.core/on-js-reload"}
 
-                :compiler {:main cljs-compojure-example.core
+                :compiler {:main cljs-compojure-example.app
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/cljs_compojure_example.js"
                            :output-dir "resources/public/js/compiled/out"
@@ -35,9 +43,9 @@
                ;; production. You can build this with:
                ;; lein cljsbuild once min
                {:id "min"
-                :source-paths ["src"]
+                :source-paths ["src/clj" "src/cljs"]
                 :compiler {:output-to "resources/public/js/compiled/cljs_compojure_example.js"
-                           :main cljs-compojure-example.core
+                           :main cljs-compojure-example.app
                            :optimizations :advanced
                            :pretty-print false}}]}
 
@@ -76,19 +84,21 @@
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
- 
+  
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
   
-  :profiles {:dev {:dependencies [[figwheel-sidecar "0.5.3-2"]
+  :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
+                                  [ring/ring-mock "0.3.0"]
+                                  [figwheel-sidecar "0.5.3-2"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["src" "dev"]
+                   :source-paths ["src/clj" "src/cljs" "dev"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
 
-)
+  )
